@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>9fc754e0-fbc6-47f3-b67d-2c602d89688f</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>ex1.py</StartupFile>
+    <StartupFile>main.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -23,6 +23,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="ex1.py" />
+    <Compile Include="main.py" />
   </ItemGroup>
   <ItemGroup>
     <Interpreter Include="env\">
