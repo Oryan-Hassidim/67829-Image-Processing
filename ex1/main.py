@@ -2,26 +2,36 @@ from ex1 import *
 import matplotlib.pyplot as plt
 
 
-def __plot(x):
-    import matplotlib.pyplot as plt
+def plot(x):
     x = list(x)
+    plt.subplot(2, 2, (1,2))
     plt.plot(x)
     return x
 
 
 main.types[3] = [
     frame_generator,
-    (map, rgb_to_grayscale),
+    (map, bgr_to_grayscale),
+    (map, grayscale_histogram),
+    pairwise,
+    (map, lambda t: norm_difference(*t)),
+    plot,
+    argmax,
+    index_to_to_index_pair
+]
+main.types[4] = [
+    frame_generator,
+    (map, bgr_to_grayscale),
     (map, grayscale_histogram),
     (map, cumsum_histogram),
     pairwise,
     (map, lambda t: norm_difference(*t)),
-    __plot,
+    plot,
     argmax,
     index_to_to_index_pair
 ]
 
-def __plot_2_scences(video_path: str, scene1: int, scene2: int):
+def plot_2_scences(video_path: str, scene1: int, scene2: int):
     """
     Plots the two scenes in the same window
     :param video_path: path to video file
@@ -46,22 +56,26 @@ def __plot_2_scences(video_path: str, scene1: int, scene2: int):
     cap.release()
 
     # plot the two frames
-    plt.subplot(1, 2, 1)
+    plt.subplot(2, 2, 3)
     plt.imshow(cv2.cvtColor(frame1, cv2.COLOR_BGR2RGB))
     plt.title("Scene 1")
-    plt.subplot(1, 2, 2)
+    # remove the axis
+    plt.axis("off")
+    plt.subplot(2, 2, 4)
     plt.imshow(cv2.cvtColor(frame2, cv2.COLOR_BGR2RGB))
     plt.title("Scene 2")
-    plt.show()
+    plt.axis("off")
 
 
 if __name__ == "__main__":
     for vp in [
-        "video1_category1.mp4",
-        "video2_category1.mp4",
-        "video3_category2.mp4",
-        "video4_category2.mp4"
+        # "video1_category1.mp4",
+        # "video2_category1.mp4",
+        # "video3_category2.mp4",
+        # "video4_category2.mp4",
+        "we_will_win_together.mp4"
     ]:
-        scene1, scene2 = main(vp, 2)
-        print(f"video: {vp}, scene1: {scene1}, scene2: {scene2}")
-        __plot_2_scences(vp, scene1, scene2)
+        scene1, scene2 = main(vp, 4)
+        plt.title(f"Video: {vp}, Scene1: {scene1}, Scene2: {scene2}")
+        plot_2_scences(vp, scene1, scene2)
+        plt.show()

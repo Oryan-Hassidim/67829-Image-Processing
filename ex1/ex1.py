@@ -18,10 +18,10 @@ def frame_generator(video_file):
     cap.release()  # release the video capture object
 
 
-def rgb_to_grayscale(frame):
+def bgr_to_grayscale(frame):
     # a function that converts a rgb frame to a grayscale frame
     # use cv2.cvtColor to convert the color space
-    gray = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     return gray  # return the grayscale frame
 
 
@@ -81,7 +81,7 @@ def main(video_path: str, video_type: int):
 main.types = {
     1: [
         frame_generator,
-        (map, rgb_to_grayscale),
+        (map, bgr_to_grayscale),
         (map, grayscale_histogram),
         pairwise,
         (map, lambda t: norm_difference(*t)),
@@ -90,7 +90,7 @@ main.types = {
     ],
     2: [
         frame_generator,
-        (map, rgb_to_grayscale),
+        (map, bgr_to_grayscale),
         (map, grayscale_histogram),
         (map, cumsum_histogram),
         pairwise,
