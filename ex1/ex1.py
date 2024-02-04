@@ -1,6 +1,15 @@
 import cv2
 import numpy as np
-from itertools import pairwise
+# check if the version of python is 3.10 or higher
+import sys
+if sys.version_info >= (3, 10):
+    from itertools import pairwise
+else:
+    from itertools import tee
+    def pairwise(iterable):
+        a, b = tee(iterable)
+        next(b, None)
+        return zip(a, b)
 
 
 def fst(t): return t[0]
