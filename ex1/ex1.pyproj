@@ -40,14 +40,11 @@
 	<ItemGroup>
 		<Content Include="requirements.txt" />
 		<Content Include="tarit.ps1" />
-		<Content Include="video1_category1.mp4" />
-		<Content Include="video2_category1.mp4" />
-		<Content Include="video3_category2.mp4" />
-		<Content Include="video4_category2.mp4" />
 		<Content Include=".\*.pdf" />
 		<Content Include=".\*.docx" />
 		<Content Include=".\*.tar" />
 		<Content Remove=".\~$*.docx" />
+		<Content Include=".\*.mp4" />
 	</ItemGroup>
 	<Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
 	<!-- Uncomment the CoreCompile target to enable the Build command in
