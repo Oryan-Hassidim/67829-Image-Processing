@@ -1,0 +1,1 @@
+tar -cvf ex2.tar ex2.py ex2.pdf requirements.txt
