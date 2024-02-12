@@ -9,9 +9,9 @@ def fst(x): return x[0]
 def snd(x): return x[1]
 
 
-def plot_pyramid(pyramid: list[np.ndarray], title: str) -> None:
+def plot_gaussian_pyramid(pyramid: list[np.ndarray], title: str) -> None:
     """
-    Plot the pyramid of images.
+    Plot the gaussian pyramid of images.
 
     Args:
         pyramid (list[np.ndarray]): List of images in the pyramid.
@@ -21,6 +21,30 @@ def plot_pyramid(pyramid: list[np.ndarray], title: str) -> None:
         None
     """
     h = int(np.ceil(len(pyramid)/3))
+    f = pyramid[0].shape[0] / pyramid[0].shape[1]
+    for i, img in enumerate(pyramid):
+        plt.subplot(h, 3, i+1)
+        plt.imshow(img, cmap=img.shape[-1] == 3 and None or 'gray')
+        plt.title(f'Level {i}, size: {img.shape[:2]}')
+        plt.axis('off')
+    plt.suptitle(title)
+    plt.gcf().set_size_inches(16, 16*h*f/3)
+    plt.show()
+
+
+def plot_laplacian_pyramid(pyramid: list[np.ndarray], title: str) -> None:
+    """
+    Plot the laplacian pyramid of images.
+
+    Args:
+        pyramid (list[np.ndarray]): List of images in the pyramid.
+        title (str): Title of the plot.
+
+    Returns:
+        None
+    """
+    h = int(np.ceil(len(pyramid)/3))
+    f = pyramid[0].shape[0] / pyramid[0].shape[1]
     for i, img in enumerate(pyramid):
         plt.subplot(h, 3, i+1)
         if i < len(pyramid)-1:
@@ -29,7 +53,7 @@ def plot_pyramid(pyramid: list[np.ndarray], title: str) -> None:
         plt.title(f'Level {i}, size: {img.shape[:2]}')
         plt.axis('off')
     plt.suptitle(title)
-    plt.gcf().set_size_inches(16, 3*h)
+    plt.gcf().set_size_inches(16, 16*h*f/3)
     plt.show()
 
 
@@ -159,7 +183,7 @@ def reconstruct_laplacian_pyramid(lap_pyr: list[np.ndarray], pyrUp=cv.pyrUp) -> 
     return img
 
 
-def blend(img1: np.ndarray, img2: np.ndarray, mask: np.ndarray, levels: int, kernel_len=5) -> np.ndarray:
+def blend(img1: np.ndarray, img2: np.ndarray, mask: np.ndarray, levels: int = 6, kernel_len: int = 5) -> np.ndarray:
     """
     Blend two images using a mask.
 
@@ -167,7 +191,7 @@ def blend(img1: np.ndarray, img2: np.ndarray, mask: np.ndarray, levels: int, ker
         img1 (np.ndarray): First input image.
         img2 (np.ndarray): Second input image.
         mask (np.ndarray): Mask image.
-        levels (int): Number of levels in the pyramid.
+        levels (int, optional): Number of levels in the pyramid. Defaults to 6.
         kernel_len (int, optional): Length of the Gaussian kernel. Defaults to 5.
 
     Returns:
@@ -195,7 +219,7 @@ def blend(img1: np.ndarray, img2: np.ndarray, mask: np.ndarray, levels: int, ker
     return reconstruct_laplacian_pyramid(blended_pyr, pyr_up)
 
 
-def hybrid_image(img1: np.ndarray, img2: np.ndarray, levels: int, kernel_len=3) -> np.ndarray:
+def hybrid_image(img1: np.ndarray, img2: np.ndarray, levels: int, kernel_len: int = 5) -> np.ndarray:
     """
     Create a hybrid image by combining low-frequency content from one image and high-frequency content from another image.
 
@@ -203,7 +227,7 @@ def hybrid_image(img1: np.ndarray, img2: np.ndarray, levels: int, kernel_len=3) 
         img1 (np.ndarray): First input image.
         img2 (np.ndarray): Second input image.
         levels (int): Number of levels in the pyramid.
-        kernel_len (int, optional): Length of the Gaussian kernel. Defaults to 3.
+        kernel_len (int, optional): Length of the Gaussian kernel. Defaults to 5.
 
     Returns:
         np.ndarray: Hybrid image.
@@ -216,11 +240,11 @@ def hybrid_image(img1: np.ndarray, img2: np.ndarray, levels: int, kernel_len=3) 
     pyrUp = partial(my_pyrUp, kernel=kernel)
 
     pyr1 = laplacian_pyramid(gaussian_pyramid(img1, levels, pyrDown), pyrUp)
-    plot_pyramid(pyr1, 'Laplacian Pyramid 1')
+    # plot_pyramid(pyr1, 'Laplacian Pyramid 1')
     pyr2 = laplacian_pyramid(gaussian_pyramid(img2, levels, pyrDown), pyrUp)
-    plot_pyramid(pyr2, 'Laplacian Pyramid 2')
+    # plot_pyramid(pyr2, 'Laplacian Pyramid 2')
     pyr1[-1] = pyr2[-1]
-    plot_pyramid(pyr1, 'Laplacian Pyramid 1 with top level replaced')
+    # plot_pyramid(pyr1, 'Laplacian Pyramid 1 with top level replaced')
     return reconstruct_laplacian_pyramid(pyr1, pyrUp)
 
 
@@ -238,10 +262,14 @@ def cli():
 @click.option('--img2_path', '-s', required=True, type=__read_path, prompt="Enter the path of the second image")
 @click.option('--mask_path', '-m', required=True, type=__read_path, prompt="Enter the path of the mask")
 @click.option('--out_path', '-o', required=True, type=__write_path, prompt="Enter the path of the output image")
+@click.option('--levels', '-l', required=False, type=int, prompt="Enter number of levels in the pyramid")
+@click.option('--kernel_len', '-k', required=False, type=int, prompt="Enter lengthe of the blurring kernel")
 def blend_command(img1_path: str,
                   img2_path: str,
                   mask_path: str,
-                  out_path: str) -> None:
+                  out_path: str,
+                  levels: int = 6,
+                  kernel_len: int = 5) -> None:
     """
     Command to blend two images using a mask.
 
@@ -250,6 +278,8 @@ def blend_command(img1_path: str,
         img2_path (str): Path of the second image.
         mask_path (str): Path of the mask.
         out_path (str): Path of the output image.
+        levels (int, optional): Number of levels in the pyramid. Defaults to 6.
+        kernel_len (int, optional): Length of the Gaussian kernel. Defaults to 5.
 
     Returns:
         None
@@ -257,22 +287,23 @@ def blend_command(img1_path: str,
     img1 = cv.imread(img1_path)
     img2 = cv.imread(img2_path)
     mask = cv.imread(mask_path, cv.IMREAD_GRAYSCALE)
-    max = np.min([img1.shape[:2], img2.shape[:2]], axis=0)
-    print(max)
+    max = np.max([img1.shape[:2], img2.shape[:2]], axis=0)
     img1 = cv.resize(img1, (max[1], max[0]))
     img2 = cv.resize(img2, (max[1], max[0]))
     mask = cv.resize(mask, (max[1], max[0]))
-    out = blend(img1, img2, mask, 5)
+    out = blend(img1, img2, mask, levels, kernel_len)
     cv.imwrite(out_path, out)
+    print(f"The output was successfully saved in {out_path}.")
 
 
 @cli.command(name='hybrid')
-@click.option('--img1_path', required=True, type=__read_path, prompt="Enter the path of the first image")
-@click.option('--img2_path', required=True, type=__read_path, prompt="Enter the path of the second image")
-@click.option('--out_path', required=True, type=__write_path, prompt="Enter the path of the output image")
-def hybrid_command(img1_path: str,
-                   img2_path: str,
-                   out_path: str) -> None:
+@click.option('--img1_path', '-f', required=True, type=__read_path, prompt="Enter the path of the first image")
+@click.option('--img2_path', '-s', required=True, type=__read_path, prompt="Enter the path of the second image")
+@click.option('--out_path', '-o', required=True, type=__write_path, prompt="Enter the path of the output image")
+@click.option('--levels', '-l', required=False, type=int, prompt="Enter number of levels in the pyramid")
+@click.option('--kernel_len', '-k', required=False, type=int, prompt="Enter lengthe of the blurring kernel")
+def hybrid_command(img1_path: str, img2_path: str, out_path: str,
+                   levels: int = 3, kernel_len: int = 5) -> None:
     """
     Command to create a hybrid image by combining low-frequency content from one image and high-frequency content from another image.
 
@@ -280,14 +311,21 @@ def hybrid_command(img1_path: str,
         img1_path (str): Path of the first image.
         img2_path (str): Path of the second image.
         out_path (str): Path of the output image.
+        levels (int): number of levels of the pyramid.
+        levels (int, optional): Number of levels in the pyramid. Defaults to 3.
+        kernel_len (int, optional): Length of the Gaussian kernel. Defaults to 5.
 
     Returns:
         None
     """
     img1 = cv.imread(img1_path, cv.IMREAD_GRAYSCALE)
     img2 = cv.imread(img2_path, cv.IMREAD_GRAYSCALE)
-    out = hybrid_image(img1, img2, 5)
+    max = np.max([img1.shape[:2], img2.shape[:2]], axis=0)
+    img1 = cv.resize(img1, (max[1], max[0]))
+    img2 = cv.resize(img2, (max[1], max[0]))
+    out = hybrid_image(img1, img2, levels, kernel_len)
     cv.imwrite(out_path, out)
+    print(f"The output was successfully saved in {out_path}.")
 
 
 if __name__ == '__main__':
