@@ -1,1 +1,1 @@
-tar -cvf ex1.tar ex1.py ex1.pdf requirements.txt
+tar -cvf $env:USERPROFILE\Desktop\ex1.tar ex1.py ex1.pdf requirements.txt

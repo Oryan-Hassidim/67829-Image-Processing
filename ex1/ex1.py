@@ -64,7 +64,6 @@ def index_to_to_index_pair(frame_index):
 
 
 def pipeline(*lst):
-
     param = lst[0]
 
     for x in lst[1:]:

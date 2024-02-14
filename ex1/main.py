@@ -1,10 +1,11 @@
+from typing import Callable
 from ex1 import *
 import matplotlib.pyplot as plt
 
 
 def plot(x):
     x = list(x)
-    plt.subplot(2, 2, (1,2))
+    plt.subplot(3, 4, (1,4))
     plt.plot(x)
     return x
 
@@ -66,16 +67,43 @@ def plot_2_scences(video_path: str, scene1: int, scene2: int):
     plt.title("Scene 2")
     plt.axis("off")
 
+def plot_4_frames(video_path: str, frame1: int, hist_func: Callable[[np.ndarray], np.ndarray] = grayscale_histogram):
+    """
+    Plots the four scenes and their histograms in the same window
+    :param video_path: path to video file
+    :param scene1: last frame index of the first scene
+    :return: None
+    """
+    cap = cv2.VideoCapture(video_path)
+    x = list(range(256))
+    for i in range(4):
+        frame_i = frame1 + i
+        # get scene1 frame
+        cap.set(1, frame_i)
+        ret, frame = cap.read()
+        if not ret:
+            raise ValueError("frame1 not found")
+        hist = hist_func(bgr_to_grayscale(frame))
+        plt.subplot(3, 4, 5 + i)
+        plt.bar(x, hist)
+        plt.title(f"frame {frame_i} histogram")
+        plt.subplot(3, 4, 9 + i)
+        plt.imshow(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+        plt.title(f"frame {frame_i}")
+        plt.axis("off")
+    cap.release()
+
 
 if __name__ == "__main__":
     for vp in [
-        # "video1_category1.mp4",
-        # "video2_category1.mp4",
-        # "video3_category2.mp4",
-        # "video4_category2.mp4",
-        "we_will_win_together.mp4"
+        "video1_category1.mp4",
+        "video2_category1.mp4",
+        "video3_category2.mp4",
+        "video4_category2.mp4",
+        # "we_will_win_together.mp4"
     ]:
-        scene1, scene2 = main(vp, 4)
+        scene1, scene2 = main(vp, 1)
         plt.title(f"Video: {vp}, Scene1: {scene1}, Scene2: {scene2}")
-        plot_2_scences(vp, scene1, scene2)
+        plot_4_frames(vp, scene1 - 1, lambda x: cumsum_histogram(grayscale_histogram(x)))
+        # plt.tight_layout()
         plt.show()
